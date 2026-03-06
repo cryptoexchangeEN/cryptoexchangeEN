@@ -6,7 +6,6 @@
     <title>RFOF MAINNET ALPHA v6.0</title>
 </head>
 <body>
-
 <div class="rfof-blockchain-system">
     <div class="system-header">
         <h2>RFOF MAINNET ALPHA v6.0</h2>
@@ -34,24 +33,9 @@
         <button id="mint-trigger" class="main-action">EXECUTE PZQQET MINT (J)</button>
     </div>
 
-    <div id="pool-module" class="module" style="display:none; border: 1px solid #00ff41;">
-        <div class="label" style="color:#00ff41;">ASSET STAKING POOL</div>
-        <select id="pool-asset" style="width:100%; background:#000; color:#fff; border:1px solid #333;">
-            <option value="RFOF">RFOF Token</option>
-            <option value="PRAI">PRAI Token</option>
-        </select>
-        <button onclick="staking.joinPool()" style="width:100%; margin-top:5px; background:#00ff41; border:none; cursor:pointer;">ENTER POOL</button>
-    </div>
-
     <div class="module explorer">
-        <div class="label">BLOCKCHAIN EXPLORER (HEAD & BODY)</div>
+        <div class="label">BLOCKCHAIN EXPLORER</div>
         <div id="blockchain-track" class="chain-visual"></div>
-    </div>
-
-    <div id="inspector" class="module" style="display:none">
-        <div class="label">BLOCK INSPECTOR</div>
-        <div id="block-details" class="details-view"></div>
-        <button onclick="ui.closeInspector()" class="small-btn">CLOSE</button>
     </div>
 </div>
 
@@ -59,13 +43,12 @@
     <div style="border-bottom: 2px solid #222; padding-bottom: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-size: 1.1rem; color: #00f2ff; font-weight: bold;">PZQQET MASTER CORE v42</div>
-            <button id="view-toggle-btn" onclick="toggleView()" style="display:none; background: #111; color: #00ff41; border: 1px solid #00ff41; font-size: 0.6rem; padding: 2px 5px; cursor: pointer;">ADMIN VIEW</button>
+            <button id="view-toggle-btn" onclick="toggleView()" style="display:none; background: #111; color: #00ff41; border: 1px solid #00ff41; font-size: 0.6rem; cursor: pointer;">ADMIN VIEW</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px;">
             <span id="s-auth" style="font-size: 0.5rem; border: 1px solid #555; padding: 2px;">AUTH: LOGGED OUT</span>
             <span id="s-role" style="font-size: 0.5rem; border: 1px solid #555; padding: 2px;">ROLE: USER</span>
         </div>
-        <div id="active-address" style="font-size: 0.55rem; color: #ff00ff; margin-top: 6px;">NO ACTIVE CHAIN</div>
     </div>
 
     <div id="core-viewport" style="margin-top: 20px;">
@@ -89,6 +72,7 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
         <input type="text" id="arch-asset" placeholder="Asset Name/Hash..." style="background:#000; color:#fff; border:1px solid #333; padding:5px;">
         <button onclick="architect.mintAction()" style="background:#00ff41; color:#000; cursor:pointer;">FORCE MINT</button>
+        <button onclick="architect.burnAction()" style="background:#ff0000; color:#fff; cursor:pointer;">BURN ASSET</button>
     </div>
 </div>
 
@@ -97,46 +81,46 @@
     .rfof-blockchain-system { background: var(--bg); color: var(--text); padding: 15px; border: 2px solid var(--neon); border-radius: 12px; font-family: monospace; max-width: 600px; margin: auto; }
     .module { background: #080808; border: 1px solid #222; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .rfof-input { width: 100%; padding: 8px; background: #000; border: 1px solid var(--neon); color: #fff; margin-bottom: 5px; }
-    .main-action { width: 100%; padding: 15px; background: var(--neon); border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 5px; }
+    .main-action { width: 100%; padding: 15px; background: var(--neon); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+    .chain-visual { display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
     .balance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
     .b-box { background: #151515; padding: 10px; border: 1px solid #333; text-align: center; }
-    .small-btn { font-size: 0.6rem; background: #333; color: #fff; border: none; cursor: pointer; }
 </style>
 
 <script>
 const MASTER_ADMIN = "RFOF-46D65B1C4A8A4FA3E3B6";
 
-const staking = {
-    joinPool() {
-        const asset = document.getElementById('pool-asset').value;
-        alert(`Eingang in den ${asset} Pool bestätigt.`);
-        // Hier lässt sich später die Logik zur RFOF/PRAI Balance-Abbuchung verknüpfen
-    }
-};
-
-/* --- SYSTEM-MONITOR-LOOP (SICHERHEITS-SCHICHT) --- */
+/* --- LOGIK-ADAPTER --- */
 setInterval(() => {
     const addr = localStorage.getItem("current_wallet_address");
     const isMaster = (addr === MASTER_ADMIN);
-    
-    // UI-Sichtbarkeit für angemeldete User
-    const isLogged = !!addr;
-    document.getElementById('pool-module').style.display = isLogged ? 'block' : 'none';
-    
-    // Admin-Spezifische Sichtbarkeit
-    document.getElementById('architect-core').style.display = (isLogged && isMaster) ? 'block' : 'none';
-    document.getElementById('view-toggle-btn').style.display = isMaster ? 'block' : 'none';
-}, 500);
+    const isAdminView = (document.getElementById('view-admin').style.display === 'block');
 
+    // Sichtbarkeit: ARCHITECT CORE nur bei Admin-Rolle UND aktiver Admin-View
+    const architectCore = document.getElementById('architect-core');
+    architectCore.style.display = (isMaster && isAdminView) ? 'block' : 'none';
+
+    // UI-Updates
+    document.getElementById('view-toggle-btn').style.display = isMaster ? 'block' : 'none';
+}, 200);
+
+function toggleView() {
+    const vU = document.getElementById('view-user');
+    const vA = document.getElementById('view-admin');
+    const isShowingAdmin = (vA.style.display === 'block');
+    vU.style.display = isShowingAdmin ? 'block' : 'none';
+    vA.style.display = isShowingAdmin ? 'none' : 'block';
+}
+
+// ... Rest der Logik bleibt unverändert ...
 const vault = {
     async access() { 
-        const addr = "RFOF-ADMIN-SIM"; // Vereinfacht für Test
-        localStorage.setItem("current_wallet_address", addr); 
+        // Für den Test: Simulierter Admin-Login
+        localStorage.setItem("current_wallet_address", MASTER_ADMIN); 
         location.reload(); 
     },
     logout() { localStorage.removeItem("current_wallet_address"); location.reload(); }
 };
-// ... restliche Funktionen ...
 </script>
 </body>
 </html>
