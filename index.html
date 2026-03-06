@@ -28,21 +28,54 @@
         </div>
         <div class="balance-grid">
             <div class="b-box">ECCU: <span id="bal-eccu">0.00</span></div>
+            <div class="b-box">EURO: <span id="bal-euro">0.00 €</span></div>
+        </div>
+        <button id="mint-trigger" class="main-action">EXECUTE PZQQET MINT (J)</button>
+    </div>
+
+    <div class="module explorer">
+        <div class="label">BLOCKCHAIN EXPLORER (HEAD & BODY)</div>
+        <div id="blockchain-track" class="chain-visual"></div>
+    </div>
+</div>
+
+<div class="eccu-master-container" id="prai-core-root" style="border: 2px solid #00f2ff; background: #000; padding: 20px; color: #fff; border-radius: 8px; margin-top: 20px; max-width: 600px; margin: auto;">
+    <div style="border-bottom: 2px solid #222; padding-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.1rem; color: #00f2ff; font-weight: bold;">PZQQET MASTER CORE v42</div>
+            <button id="view-toggle-btn" onclick="toggleView()" style="display:none; background: #111; color: #00ff41; border: 1px solid #00ff41; font-size: 0.6rem; cursor: pointer;">ADMIN VIEW</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px;">
+            <span id="s-auth" style="font-size: 0.5rem; border: 1px solid #555; padding: 2px;">AUTH: LOGGED OUT</span>
+            <span id="s-role" style="font-size: 0.5rem; border: 1px solid #555; padding: 2px;">ROLE: USER</span>
+        </div>
+    </div>
+    <div id="core-viewport" style="margin-top: 20px;">
+        <div id="view-user" style="display: block;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div style="border: 1px solid #333; padding: 5px;">RFOF: <span id="u-rfof">0.00</span></div>
+                <div style="border: 1px solid #333; padding: 5px;">PRAI: <span id="u-prai">0.00</span></div>
+                <div style="border: 1px solid #333; padding: 5px;">ECCU: <span id="u-eccu">0.00</span></div>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <button onclick="txAction('DEPOSIT')" style="flex:1; background:#00ff41; color:#000; font-weight:bold;">IN</button>
+                <button onclick="txAction('WITHDRAW')" style="flex:1; background:#ff00ff; color:#000; font-weight:bold;">OUT</button>
+            </div>
+        </div>
+        <div id="view-admin" style="display: none; border: 2px dashed #00ff41; padding: 15px;">
+            <div style="color: #00ff41; margin-bottom: 5px;">[ADMIN CONSOLE]</div>
+            <input type="text" id="asset-name" placeholder="Asset Name..." style="width: 100%; background: #000; color: #fff;">
+            <button onclick="adminMint()" style="width: 100%; margin-top: 5px; background: #00ff41; color:#000; font-weight:bold;">DEPLOY / MINT</button>
         </div>
     </div>
 </div>
 
-<div class="eccu-master-container" id="prai-core-root" style="border: 2px solid #00f2ff; background: #000; padding: 20px; color: #fff; margin: 20px auto; max-width: 600px;">
-    <div style="display: flex; justify-content: space-between;">
-        <span>PZQQET MASTER CORE v42</span>
-        <button id="view-toggle-btn" onclick="toggleView()" style="display:none;">ADMIN VIEW</button>
-    </div>
-    <div id="view-user" style="display: block;">
-        RFOF: <span id="u-rfof">0.00</span> | PRAI: <span id="u-prai">0.00</span>
-    </div>
-    <div id="view-admin" style="display: none; border: 1px dashed #00ff41; padding: 10px;">
-        [ADMIN CONSOLE]
-        <button onclick="adminMint()">DEPLOY / MINT</button>
+<div id="architect-core" class="module" style="display:none; border: 2px solid #ff00ff; max-width: 600px; margin: 20px auto; background: #050005; padding: 20px; color: #fff; border-radius: 8px;">
+    <div style="font-weight: bold; color: #ff00ff; font-family: monospace;">[PZQQET ARCHITECT CORE v42]</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <input type="text" id="arch-asset" placeholder="Asset Name/Hash..." style="background:#000; color:#fff; border:1px solid #333; padding:5px;">
+        <button onclick="architect.mintAction()" style="background:#00ff41; color:#000; cursor:pointer;">FORCE MINT</button>
+        <button onclick="architect.burnAction()" style="background:#ff0000; color:#fff; cursor:pointer;">BURN ASSET</button>
     </div>
 </div>
 
@@ -52,55 +85,69 @@
 </div>
 
 <style>
-    :root { --neon: #00f2ff; --magenta: #ff00ff; }
-    .rfof-blockchain-system { color: #fff; padding: 15px; border: 2px solid var(--neon); max-width: 600px; margin: auto; }
-    .module { background: #080808; padding: 12px; border: 1px solid #222; margin-bottom: 10px; }
-    .rfof-input { width: 100%; background: #000; border: 1px solid var(--neon); color: #fff; }
+    :root { --neon: #00f2ff; --magenta: #ff00ff; --bg: #000; --text: #fff; }
+    .rfof-blockchain-system { background: var(--bg); color: var(--text); padding: 15px; border: 2px solid var(--neon); border-radius: 12px; font-family: monospace; max-width: 600px; margin: auto; }
+    .module { background: #080808; border: 1px solid #222; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+    .rfof-input { width: 100%; padding: 8px; background: #000; border: 1px solid var(--neon); color: #fff; margin-bottom: 5px; }
+    .main-action { width: 100%; padding: 15px; background: var(--neon); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+    .chain-visual { display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
 </style>
 
 <script>
+/* --- KERN-LOGIN LOGIK (KONSTANT) --- */
+const cryptoLib = {
+    async hash(data) { const msgBuffer = new TextEncoder().encode(data); const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+};
 const MASTER_ADMIN = "RFOF-46D65B1C4A8A4FA3E3B6";
 
 const vault = {
     async access() { 
         const seed = document.getElementById('seed-phrase').value; 
         if(seed.length < 5) return; 
-        // Hash-Logik wie vorher
-        const addr = "RFOF-" + (await crypto.subtle.digest('SHA-256', new TextEncoder().encode(seed)))
-            .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).then(h => h.substring(0, 20).toUpperCase());
+        const addr = "RFOF-" + (await cryptoLib.hash(seed)).substring(0, 20).toUpperCase(); 
         localStorage.setItem("current_wallet_address", addr); 
         location.reload(); 
     },
-    generate() { document.getElementById('seed-phrase').value = Math.random().toString(36).substring(2, 15); },
-    logout() { localStorage.removeItem("current_wallet_address"); location.reload(); }
+    logout() { localStorage.removeItem("current_wallet_address"); location.reload(); },
+    generate() { document.getElementById('seed-phrase').value = Math.random().toString(36).substring(2, 15); }
 };
 
-// Initialisierung bei Laden
-window.onload = () => {
+/* --- INTEGRATIONS-LOGIK & RAHMEN-SYNC --- */
+setInterval(() => {
     const addr = localStorage.getItem("current_wallet_address");
+    const isMaster = (addr === MASTER_ADMIN);
+    const isAdminView = (document.getElementById('view-admin').style.display === 'block');
+    
+    // Auth-UI State
     if(addr) {
         document.getElementById('auth-layer').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('display-addr').innerText = addr;
-        document.getElementById('global-explorer').style.display = 'block';
     }
-};
+    
+    // Core & Explorer Sichtbarkeit
+    document.getElementById('architect-core').style.display = (isMaster && isAdminView) ? 'block' : 'none';
+    document.getElementById('global-explorer').style.display = addr ? 'block' : 'none';
+    document.getElementById('view-toggle-btn').style.display = isMaster ? 'block' : 'none';
+    document.getElementById('s-auth').innerText = addr ? 'AUTH: LOGGED IN' : 'AUTH: LOGGED OUT';
+    document.getElementById('s-role').innerText = isMaster ? 'ROLE: ADMIN' : 'ROLE: USER';
+
+    // Global Explorer Sync
+    const chainData = document.getElementById('chain-data-view');
+    const fullChain = JSON.parse(localStorage.getItem('rfof_chain') || "[]");
+    chainData.innerText = fullChain.length > 0 ? JSON.stringify(fullChain, null, 2) : "SYSTEM READY - NO BLOCKS";
+}, 500);
 
 function toggleView() {
     const vU = document.getElementById('view-user');
     const vA = document.getElementById('view-admin');
-    vU.style.display = (vA.style.display === 'block') ? 'block' : 'none';
-    vA.style.display = (vA.style.display === 'block') ? 'none' : 'block';
+    const isShowingAdmin = (vA.style.display === 'block');
+    vU.style.display = isShowingAdmin ? 'block' : 'none';
+    vA.style.display = isShowingAdmin ? 'none' : 'block';
 }
 
-// Intervall für Explorer-Sync
-setInterval(() => {
-    const addr = localStorage.getItem("current_wallet_address");
-    document.getElementById('view-toggle-btn').style.display = (addr === MASTER_ADMIN) ? 'block' : 'none';
-    
-    const fullChain = JSON.parse(localStorage.getItem('rfof_chain') || "[]");
-    document.getElementById('chain-data-view').innerText = fullChain.length > 0 ? JSON.stringify(fullChain, null, 2) : "SYSTEM READY - NO BLOCKS";
-}, 1000);
+function txAction(type) { /* Core Logik ... */ }
+function adminMint() { /* Admin deployment ... */ }
 </script>
 </body>
 </html>
