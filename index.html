@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RFOF MAINNET ALPHA v6.0</title>
+    <title>RFOF MAINNET ALPHA v6.0 - FINAL</title>
 </head>
 <body>
 <div class="rfof-blockchain-system">
@@ -34,7 +34,7 @@
     </div>
 
     <div class="module explorer">
-        <div class="label">BLOCKCHAIN EXPLORER</div>
+        <div class="label">BLOCKCHAIN EXPLORER (HEAD & BODY)</div>
         <div id="blockchain-track" class="chain-visual"></div>
     </div>
 </div>
@@ -58,6 +58,10 @@
                 <div style="border: 1px solid #333; padding: 5px;">PRAI: <span id="u-prai">0.00</span></div>
                 <div style="border: 1px solid #333; padding: 5px;">ECCU: <span id="u-eccu">0.00</span></div>
             </div>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <button onclick="txAction('DEPOSIT')" style="flex:1; background:#00ff41; color:#000; font-weight:bold;">IN</button>
+                <button onclick="txAction('WITHDRAW')" style="flex:1; background:#ff00ff; color:#000; font-weight:bold;">OUT</button>
+            </div>
         </div>
         <div id="view-admin" style="display: none; border: 2px dashed #00ff41; padding: 15px;">
             <div style="color: #00ff41; margin-bottom: 5px;">[ADMIN CONSOLE]</div>
@@ -76,6 +80,11 @@
     </div>
 </div>
 
+<div id="global-explorer" class="module" style="display:none; border: 2px solid #fff; max-width: 600px; margin: 20px auto; background: #000; padding: 20px; color: #fff;">
+    <div class="label">GLOBAL BLOCKCHAIN EXPLORER</div>
+    <div id="chain-data-view" style="font-size: 0.7rem; color: #00ff41; height: 100px; overflow-y: auto;"></div>
+</div>
+
 <style>
     :root { --neon: #00f2ff; --magenta: #ff00ff; --bg: #000; --text: #fff; }
     .rfof-blockchain-system { background: var(--bg); color: var(--text); padding: 15px; border: 2px solid var(--neon); border-radius: 12px; font-family: monospace; max-width: 600px; margin: auto; }
@@ -83,26 +92,27 @@
     .rfof-input { width: 100%; padding: 8px; background: #000; border: 1px solid var(--neon); color: #fff; margin-bottom: 5px; }
     .main-action { width: 100%; padding: 15px; background: var(--neon); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
     .chain-visual { display: flex; gap: 10px; overflow-x: auto; padding: 10px; }
-    .balance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
-    .b-box { background: #151515; padding: 10px; border: 1px solid #333; text-align: center; }
 </style>
 
 <script>
 const MASTER_ADMIN = "RFOF-46D65B1C4A8A4FA3E3B6";
 
-/* --- LOGIK-ADAPTER --- */
+/* --- INTEGRATIONS-LOGIK --- */
 setInterval(() => {
     const addr = localStorage.getItem("current_wallet_address");
     const isMaster = (addr === MASTER_ADMIN);
     const isAdminView = (document.getElementById('view-admin').style.display === 'block');
-
-    // Sichtbarkeit: ARCHITECT CORE nur bei Admin-Rolle UND aktiver Admin-View
-    const architectCore = document.getElementById('architect-core');
-    architectCore.style.display = (isMaster && isAdminView) ? 'block' : 'none';
-
-    // UI-Updates
+    
+    // Sichtbarkeits-Kontrolle
+    document.getElementById('architect-core').style.display = (isMaster && isAdminView) ? 'block' : 'none';
+    document.getElementById('global-explorer').style.display = addr ? 'block' : 'none';
     document.getElementById('view-toggle-btn').style.display = isMaster ? 'block' : 'none';
-}, 200);
+
+    // Global Explorer Sync
+    const chainData = document.getElementById('chain-data-view');
+    const fullChain = JSON.parse(localStorage.getItem('rfof_chain') || "[]");
+    chainData.innerText = fullChain.length > 0 ? JSON.stringify(fullChain, null, 2) : "SYSTEM READY - NO BLOCKS";
+}, 500);
 
 function toggleView() {
     const vU = document.getElementById('view-user');
@@ -112,15 +122,7 @@ function toggleView() {
     vA.style.display = isShowingAdmin ? 'none' : 'block';
 }
 
-// ... Rest der Logik bleibt unverändert ...
-const vault = {
-    async access() { 
-        // Für den Test: Simulierter Admin-Login
-        localStorage.setItem("current_wallet_address", MASTER_ADMIN); 
-        location.reload(); 
-    },
-    logout() { localStorage.removeItem("current_wallet_address"); location.reload(); }
-};
+// ... (Rest deiner bereits vorhandenen Kern-Logik) ...
 </script>
 </body>
 </html>
